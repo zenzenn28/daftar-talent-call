@@ -599,6 +599,24 @@
     </div>
   </div>
 
+  <!-- Pertanyaan Tambahan -->
+  <div class="card">
+    <div class="card-header">
+      <div class="card-icon icon-purple">📝</div>
+      <div class="card-title">Pertanyaan Tambahan</div>
+    </div>
+
+    <div class="field">
+      <label>Kesibukan & Pengalaman Kerja</label>
+      <textarea id="kesibukan" placeholder="Ceritakan kesibukan kamu saat ini dan pengalaman kerja sebelumnya (jika ada)"></textarea>
+    </div>
+
+    <div class="field" style="margin-bottom:0">
+      <label>Ceritakan Tentang Diri Kamu</label>
+      <textarea id="tentangdiri" placeholder="Perkenalkan dirimu, kepribadian, dan alasan ingin bergabung sebagai talent Sleepcall"></textarea>
+    </div>
+  </div>
+
   <!-- Foto -->
   <div class="card">
     <div class="card-header">
@@ -717,11 +735,13 @@
   }
 
   async function kirimWA() {
-    const nama     = document.getElementById('nama').value.trim();
-    const gender   = document.getElementById('gender').value;
-    const usia     = document.getElementById('usia').value.trim();
-    const kota     = document.getElementById('kota').value.trim();
-    const jamkerja = document.getElementById('jamkerja').value.trim();
+    const nama       = document.getElementById('nama').value.trim();
+    const gender     = document.getElementById('gender').value;
+    const usia       = document.getElementById('usia').value.trim();
+    const kota       = document.getElementById('kota').value.trim();
+    const jamkerja   = document.getElementById('jamkerja').value.trim();
+    const kesibukan  = document.getElementById('kesibukan').value.trim();
+    const tentangdiri= document.getElementById('tentangdiri').value.trim();
 
     const checkboxes = document.querySelectorAll('input[type="checkbox"]:checked');
     const layanan = Array.from(checkboxes).map(cb => cb.value);
@@ -732,6 +752,10 @@
     }
     if (layanan.length === 0) {
       alert('⚠️ Pilih minimal satu layanan yang kamu kuasai.');
+      return;
+    }
+    if (!kesibukan || !tentangdiri) {
+      alert('⚠️ Harap isi semua pertanyaan tambahan.');
       return;
     }
     if (!fotoFile) {
@@ -770,13 +794,17 @@ ${jamkerja}
 🎧 *Layanan yang Dikuasai*
 ${layananText}
 
+📝 *Pertanyaan Tambahan*
+• Kesibukan & Pengalaman : ${kesibukan}
+• Tentang Diri : ${tentangdiri}
+
 📸 *Foto Diri*
 ${fotoUrl}
 
 ---
 _Dikirim via form pendaftaran Sleepcall_`;
 
-    const nomorWA = '6281241556594';
+    const nomorWA = gender === 'Perempuan' ? '6281241556594' : '6285188502012';
     const encoded = encodeURIComponent(pesan);
     window.open(`https://wa.me/${nomorWA}?text=${encoded}`, '_blank');
 
