@@ -624,7 +624,7 @@
       <div class="card-title">Foto Diri</div>
     </div>
     <p style="font-size:13px; color:var(--muted); margin-bottom:14px; line-height:1.6;">
-      Jika kamu lolos seleksi, foto kamu akan digunakan dan dipublikasikan melalui Instagram dan Tiktok resmi agensi.
+      Jika kamu lolos seleksi, foto akan digunakan dan publikasikan melalui Instagram dan TikTok resmi agensi.
     </p>
 
     <!-- Empty state -->
@@ -669,13 +669,20 @@
 </div>
 
 <script>
-  const CLOUD_NAME = 'dqjgutyts';
-  const UPLOAD_PRESET = 'b9607qjj';
+  const CLOUD_NAME = 'ddttsf0th';
+  const UPLOAD_PRESET = 'ilztorxs';
   let fotoFile = null;
 
   function handleFotoChange(e) {
     const file = e.target.files[0];
     if (!file) return;
+
+    if (file.size > 5 * 1024 * 1024) {
+      alert('⚠️ Ukuran foto maksimal 5MB. Silakan pilih foto lain.');
+      e.target.value = '';
+      return;
+    }
+
     fotoFile = file;
 
     const reader = new FileReader();
@@ -700,6 +707,32 @@
     document.getElementById('fotoInput').value = '';
   }
 
+  async function kompresiFoto(file) {
+    return new Promise((resolve) => {
+      const MAX_SIZE = 5 * 1024 * 1024; // 5MB
+      if (file.size <= MAX_SIZE) { resolve(file); return; }
+
+      const img = new Image();
+      const url = URL.createObjectURL(file);
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        let w = img.width, h = img.height;
+        const MAX_DIM = 1920;
+        if (w > MAX_DIM || h > MAX_DIM) {
+          if (w > h) { h = Math.round(h * MAX_DIM / w); w = MAX_DIM; }
+          else { w = Math.round(w * MAX_DIM / h); h = MAX_DIM; }
+        }
+        canvas.width = w; canvas.height = h;
+        canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+        canvas.toBlob((blob) => {
+          URL.revokeObjectURL(url);
+          resolve(new File([blob], file.name, { type: 'image/jpeg' }));
+        }, 'image/jpeg', 0.82);
+      };
+      img.src = url;
+    });
+  }
+
   async function uploadFoto() {
     if (!fotoFile) return null;
 
@@ -707,11 +740,16 @@
     const statusText = document.getElementById('uploadStatusText');
 
     status.className = 'upload-status uploading';
-    statusText.textContent = 'Mengupload foto...';
+    statusText.textContent = 'Mempersiapkan foto...';
 
     try {
+      const fileToUpload = await kompresiFoto(fotoFile);
+
+      status.className = 'upload-status uploading';
+      statusText.textContent = 'Mengupload foto...';
+
       const formData = new FormData();
-      formData.append('file', fotoFile);
+      formData.append('file', fileToUpload);
       formData.append('upload_preset', UPLOAD_PRESET);
 
       const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`, {
